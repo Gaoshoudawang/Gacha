@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CFM抽奖模拟器</title>
+<style>
+*{ -webkit-tap-highlight-color:transparent; }
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:"Microsoft YaHei",sans-serif;}
+
+/* 舞台 */
+#stage{position:absolute;top:50%;left:50%;width:2340px;height:1080px;margin:-540px 0 0 -1170px;transform-origin:center center;overflow:hidden;}
+
+/* 背景 */
+.layer-bg{position:absolute;inset:0;z-index:1;}
+.layer-bg img{width:100%;height:100%;display:block;}
+
+/* 页面容器 */
+#pagesWrap{position:absolute;inset:0;z-index:2;display:flex;transition:transform .4s ease;}
+.page{position:relative;min-width:2340px;width:2340px;height:1080px;flex-shrink:0;}
+
+/* 浮动卡片 */
+
+
+
+/* 活动卡片（带边框容器，浮动动画） */
+.activity-card{position:absolute;z-index:2;pointer-events:none;padding:0px;background:linear-gradient(135deg,#1a3a6e,#0d1f3d,#1a3a6e);border:2px solid #3a7bd5;box-shadow:0 0 20px rgba(58,123,213,.5),inset 0 0 15px rgba(58,123,213,.2);}
+.activity-card img{width:100%;height:100%;object-fit:cover;display:block;}
+.page .activity-card:nth-of-type(1){left:293px;top:173px;width:398px;height:420px;animation:fc1 4.5s ease-in-out infinite .2s;;clip-path:url(#cardType1);}
+.page .activity-card:nth-of-type(2){left:293px;top:630px;width:398px;height:260px;animation:fc2 5s ease-in-out infinite .5s;;clip-path:url(#cardType3);}
+.page .activity-card:nth-of-type(3){left:760px;top:190px;width:820px;height:680px;animation:fc3 4.8s ease-in-out infinite .8s;;clip-path:url(#cardType2);}
+.page .activity-card:nth-of-type(4){left:1649px;top:173px;width:398px;height:420px;animation:fc4 5.2s ease-in-out infinite .1s;;clip-path:url(#cardType1);}
+.page .activity-card:nth-of-type(5){left:1649px;top:630px;width:398px;height:260px;animation:fc5 4.6s ease-in-out infinite 1.4s;;clip-path:url(#cardType3);}
+/* 敬请期待浮动卡片（全屏透明图） */
+.float-card-tba{position:absolute;inset:0;width:2340px;height:1080px;z-index:2;pointer-events:none;}
+.page .float-card-tba:nth-child(1){animation:fc1 4.5s ease-in-out infinite .2s;}
+.page .float-card-tba:nth-child(2){animation:fc2 5s ease-in-out infinite .5s;}
+.page .float-card-tba:nth-child(3){animation:fc3 4.8s ease-in-out infinite .8s;}
+.page .float-card-tba:nth-child(4){animation:fc4 5.2s ease-in-out infinite 1.1s;}
+.page .float-card-tba:nth-child(5){animation:fc5 4.6s ease-in-out infinite 1.4s;}
+
+@keyframes fc1{0%,100%{transform:translateY(0);}50%{transform:translateY(-24px);}}
+@keyframes fc2{0%,100%{transform:translateY(0);}50%{transform:translateY(-36px);}}
+@keyframes fc3{0%,100%{transform:translateY(0);}50%{transform:translateY(-24px);}}
+@keyframes fc4{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+@keyframes fc5{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+
+/* 按钮层 */
+.btn-layer{position:absolute;inset:0;z-index:10;pointer-events:none;}
+.hotspot{position:absolute;pointer-events:auto;cursor:pointer;border-radius:10px;transition:transform .12s ease,background .12s ease;-webkit-tap-highlight-color:transparent;outline:none;user-select:none;-webkit-user-select:none;}
+.hotspot:active{transform:scale(.93);background:rgba(255,215,0,.12);}
+.hotspot.pulse{animation:btnPulse 2s ease-in-out infinite;}
+@keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(100,180,255,.5);}50%{box-shadow:0 0 30px 8px rgba(100,180,255,.3);}}
+
+/* 箭头 */
+.nav-arrow{position:absolute;top:50%;margin-top:-90px;width:170px;height:180px;display:flex;align-items:center;justify-content:center;font-size:120px;color:rgba(120,180,255,.7);cursor:pointer;z-index:20;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;outline:none;text-shadow:0 0 20px rgba(80,150,255,.6);transition:color .2s,background .2s;}
+.nav-arrow:hover{color:#66b3ff;}
+.nav-arrow:active{color:#fff;}
+.nav-arrow-left{left:15px;display:none;}
+.nav-arrow-right{right:15px;display:flex;}
+body.page-0 .nav-arrow-left{display:none!important;}
+body.page-0 .nav-arrow-right{display:flex!important;}
+body.page-1 .nav-arrow-left{display:flex!important;}
+body.page-1 .nav-arrow-right{display:flex!important;}
+body.page-2 .nav-arrow-left{display:flex!important;}
+body.page-2 .nav-arrow-right{display:none!important;}
+
+/* 圆点 */
+#pageDots{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:16px;z-index:20;}
+.page-dot{width:18px;height:18px;border-radius:50%;background:rgba(120,160,220,.4);cursor:pointer;transition:background .2s,transform .2s;}
+.page-dot.active{background:#66b3ff;transform:scale(1.3);box-shadow:0 0 12px rgba(100,180,255,.8);}
+
+/* 操作指南 */
+.page-info{position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#ccc;font-size:12px;line-height:1.5;padding:8px 20px;z-index:99998;text-align:left}
+.page-info .title{color:#ffd700;font-size:13px;font-weight:bold;margin-bottom:2px}
+.page-info .guide{margin-bottom:2px}
+.page-info .guide p{margin:0}
+
+/* 免责声明 */
+.disclaimer-box{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#999;font-size:12px;line-height:1.6;padding:10px 20px;z-index:99998;text-align:left;border-top:1px solid rgba(255,255,255,0.1)}
+
+/* 全屏按钮 */
+.fs-btn{position:fixed;top:12px;right:12px;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.65);border:2px solid rgba(255,215,0,.5);color:#ffd700;font-size:26px;cursor:pointer;z-index:99999;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.fs-btn:hover{background:rgba(0,0,0,.8);border-color:rgba(255,215,0,.8);box-shadow:0 0 8px rgba(255,215,0,.4)}
+:fullscreen .fs-btn,:fullscreen .page-info,:fullscreen .disclaimer-box{display:none !important}
+:-webkit-full-screen .fs-btn,:-webkit-full-screen .page-info,:-webkit-full-screen .disclaimer-box{display:none !important}
+#fullscreenBtn:hover{background:rgba(0,80,180,.6);}
+.ripple{position:absolute;border-radius:50%;border:3px solid rgba(255,200,50,.9);background:radial-gradient(circle,rgba(255,220,100,.25) 0%,rgba(255,180,0,.08) 60%,transparent 100%);transform:translate(-50%,-50%) scale(0);animation:rippleExpand .7s cubic-bezier(.1,.8,.3,1) forwards;pointer-events:none;z-index:100;box-shadow:0 0 24px rgba(255,200,50,.5),0 0 48px rgba(255,180,0,.25)}
+@keyframes rippleExpand{0%{transform:translate(-50%,-50%) scale(0);opacity:1}100%{transform:translate(-50%,-50%) scale(7);opacity:0}}
+.particle{position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:100}
+.flash{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,210,.9) 0%,rgba(255,220,100,.35) 40%,transparent 70%);transform:translate(-50%,-50%) scale(0);animation:flashBurst .55s ease-out forwards;pointer-events:none;z-index:99}
+@keyframes flashBurst{0%{transform:translate(-50%,-50%) scale(0);opacity:1}50%{transform:translate(-50%,-50%) scale(1.6);opacity:.7}100%{transform:translate(-50%,-50%) scale(3);opacity:0}}
+.shockwave{position:absolute;border-radius:50%;border:2px solid rgba(255,230,120,.6);transform:translate(-50%,-50%) scale(0);animation:shockwaveExpand .8s ease-out forwards;pointer-events:none;z-index:98}
+@keyframes shockwaveExpand{0%{transform:translate(-50%,-50%) scale(0);opacity:.8}100%{transform:translate(-50%,-50%) scale(10);opacity:0}}
+
+/* BGM音量控制 */
+.bgm-volume-control{position:fixed;top:72px;right:12px;width:36px;height:130px;background:rgba(0,0,0,.65);border:2px solid rgba(255,215,0,.4);border-radius:18px;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px 0;gap:8px;}
+.bgm-volume-icon{color:#ffd700;font-size:18px;line-height:1;text-shadow:0 0 6px rgba(255,215,0,.6);}
+.bgm-volume-slider-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.bgm-volume-slider{-webkit-appearance:none;appearance:none;width:90px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;outline:none;transform:rotate(-90deg);cursor:pointer;}
+.bgm-volume-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#ffd700;cursor:pointer;box-shadow:0 0 8px rgba(255,215,0,.8);border:none;}
+.bgm-volume-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#ffd700;cursor:pointer;box-shadow:0 0 8px rgba(255,215,0,.8);border:none;}
+.bgm-volume-value{color:#ffd700;font-size:11px;font-weight:bold;line-height:1;}
+</style>
+</head>
+<body class="page-0" data-page="0">
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- type1: 左上/右上 上凹+下凹 -->
+    <clipPath id="cardType1" clipPathUnits="objectBoundingBox">
+      <path d="M 0.1,0 Q 0.5,0.12 0.9,0 Q 1,0 1,0.1 L 1,0.9 Q 1,1 0.9,1 Q 0.5,0.88 0.1,1 Q 0,1 0,0.9 L 0,0.1 Q 0,0 0.1,0 Z" />
+    </clipPath>
+    <!-- type2: 中间 上凹+下凹（凹更深） -->
+    <clipPath id="cardType2" clipPathUnits="objectBoundingBox">
+      <path d="M 0.08,0 Q 0.5,0.12 0.92,0 Q 1,0 1,0.08 L 1,0.92 Q 1,1 0.92,1 Q 0.5,0.88 0.08,1 Q 0,1 0,0.92 L 0,0.08 Q 0,0 0.08,0 Z" />
+    </clipPath>
+    <!-- type3: 左下/右下 上凹+下凸 -->
+    <clipPath id="cardType3" clipPathUnits="objectBoundingBox">
+      <path d="M 0.1,0 Q 0.5,0.12 0.9,0 Q 1,0 1,0.1 L 1,0.9 Q 1,1 0.9,1 Q 0.5,0.8 0.1,1 Q 0,1 0,0.9 L 0,0.1 Q 0,0 0.1,0 Z" />
+    </clipPath>
+  </defs>
+</svg>
+
+
+
+<div id="stage">
+  <div class="layer-bg"><img src="images/pages/home/home_bg.png"></div>
+
+  <div id="pagesWrap">
+    <!-- 第1页 -->
+    <div class="page">
+      <div class="activity-card"><img src="images/pages/float/page1_card1.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page1_card2.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page1_card3.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page1_card4.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page1_card5.png"></div>
+      <div class="btn-layer">
+        <div class="hotspot" data-name="王者近战夺宝" onclick="openActivity('https://gaoshoudawang.github.io/Leibao-Gacha/')" style="left:293px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="神兵匣夺宝" onclick="openActivity('https://gaoshoudawang.github.io/Shenbingxia-Gacha/')" style="left:293px;top:630px;width:398px;height:260px"></div>
+        <div class="hotspot pulse" data-name="女帝夺宝" onclick="openActivity('https://gaoshoudawang.github.io/Shenhua-Gacha/')" style="left:760px;top:190px;width:820px;height:680px"></div>
+        <div class="hotspot" data-name="离恨烟夺宝" onclick="openActivity('https://gaoshoudawang.github.io/Lihenyan-Gacha/')" style="left:1649px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="熔岩夺宝" onclick="openActivity('https://gaoshoudawang.github.io/Rongyan-Gacha/')" style="left:1649px;top:630px;width:398px;height:260px"></div>
+      </div>
+    </div>
+    <!-- 第2页 -->
+    <div class="page">
+      <img class="float-card-tba" src="images/pages/float/page2_card1.png">
+      <img class="float-card-tba" src="images/pages/float/page2_card2.png">
+      <img class="float-card-tba" src="images/pages/float/page2_card3.png">
+      <img class="float-card-tba" src="images/pages/float/page2_card4.png">
+      <img class="float-card-tba" src="images/pages/float/page2_card5.png">
+      <div class="btn-layer">
+        <div class="hotspot" data-name="敬请期待" style="left:293px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:293px;top:630px;width:398px;height:260px"></div>
+        <div class="hotspot pulse" data-name="敬请期待" style="left:760px;top:190px;width:820px;height:680px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:1649px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:1649px;top:630px;width:398px;height:260px"></div>
+      </div>
+    </div>
+    <!-- 第3页 -->
+    <div class="page">
+      <img class="float-card-tba" src="images/pages/float/page3_card1.png">
+      <img class="float-card-tba" src="images/pages/float/page3_card2.png">
+      <img class="float-card-tba" src="images/pages/float/page3_card3.png">
+      <img class="float-card-tba" src="images/pages/float/page3_card4.png">
+      <img class="float-card-tba" src="images/pages/float/page3_card5.png">
+      <div class="btn-layer">
+        <div class="hotspot" data-name="敬请期待" style="left:293px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:293px;top:630px;width:398px;height:260px"></div>
+        <div class="hotspot pulse" data-name="敬请期待" style="left:760px;top:190px;width:820px;height:680px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:1649px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:1649px;top:630px;width:398px;height:260px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 箭头 -->
+  <div class="nav-arrow nav-arrow-left" onclick="goPage(parseInt(document.body.dataset.page)-1)">《</div>
+  <div class="nav-arrow nav-arrow-right" onclick="goPage(parseInt(document.body.dataset.page)+1)">》</div>
+
+  <!-- 圆点 -->
+  <div id="pageDots">
+    <div class="page-dot active" onclick="goPage(0)"></div>
+    <div class="page-dot" onclick="goPage(1)"></div>
+    <div class="page-dot" onclick="goPage(2)"></div>
+  </div>
+
+</div>
+
+<!-- 操作指南 -->
+<div class="page-info">
+  <div class="title">🎮 CFM抽奖模拟器合集</div>
+  <div class="guide">
+    <p>1. 手机请开启自动旋转，点击右上角全屏按钮横屏使用，体验更佳。</p>
+    <p>2. 左右滑动屏幕、点击左右箭头、或点击底部圆点，都可以切换页面。</p>
+    <p>3. 点击活动卡片会在新窗口打开对应抽奖模拟器。</p>
+    <p>4. 页面加载后自动播放背景音乐；如未自动播放，点击页面任意位置即可开启，右上角滑块可调节音量。</p>
+    <p>5. 各模拟器托管在GitHub，访问可能加载较慢，请耐心等待；如长时间打不开可刷新页面或检查网络。</p>
+  </div>
+</div>
+
+<!-- 免责声明 -->
+<div class="disclaimer-box">
+  ⚠️ 免责声明：本模拟器由玩家个人自制，完全免费，不得用于任何商业用途。各内容名称及形象归腾讯所有，不涉及任何真实充值或道具发放，如有侵权请联系QQ：3894801136删除。
+</div>
+
+<!-- 全屏按钮 -->
+<button class="fs-btn" id="fsBtn" onclick="toggleFullscreen()">⛶</button>
+
+<!-- BGM音量控制 -->
+<div class="bgm-volume-control">
+  <div class="bgm-volume-icon">♪</div>
+  <div class="bgm-volume-slider-wrap">
+    <input type="range" class="bgm-volume-slider" id="bgmVolume" min="0" max="100" value="60">
+  </div>
+  <div class="bgm-volume-value" id="bgmVolumeValue">60</div>
+</div>
+
+<script>
+var totalPages = 3;
+
+function layoutStage(){
+  var scale = Math.min(window.innerWidth / 2340, window.innerHeight / 1080);
+  document.getElementById('stage').style.transform = 'scale(' + scale + ')';
+}
+window.addEventListener('resize', layoutStage);
+layoutStage();
+
+function goPage(idx){ if(idx<0||idx>=totalPages)return;
+  document.body.dataset.page = idx;
+  document.body.className = 'page-' + idx;
+  document.getElementById('pagesWrap').style.transform = 'translateX(-' + (idx * 100) + '%)';
+  var dots = document.querySelectorAll('.page-dot');
+  dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
+}
+
+function openActivity(url){
+  window.open(url, '_blank');
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(function(){});
+  }else{
+    document.exitFullscreen();
+  }
+}
+
+// 触摸滑动
+var sx = 0, sy = 0;
+window.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+window.addEventListener('touchend', function(e){
+  var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)){
+    if(dx < 0) goPage(parseInt(document.body.dataset.page) + 1);
+    else goPage(parseInt(document.body.dataset.page) - 1);
+  }
+}, {passive:true});
+
+
+// ===== zip原版点击光效 =====
+function spawnEffect(cx,cy,intense){
+intense=intense||1;
+var stage=document.getElementById('stage');
+var flash=document.createElement('div');flash.className='flash';flash.style.left=cx+'px';flash.style.top=cy+'px';stage.appendChild(flash);setTimeout(function(){flash.remove()},550);
+var ripple=document.createElement('div');ripple.className='ripple';ripple.style.left=cx+'px';ripple.style.top=cy+'px';ripple.style.width=(70*intense)+'px';ripple.style.height=(70*intense)+'px';stage.appendChild(ripple);setTimeout(function(){ripple.remove()},700);
+var sw=document.createElement('div');sw.className='shockwave';sw.style.left=cx+'px';sw.style.top=cy+'px';sw.style.width='50px';sw.style.height='50px';stage.appendChild(sw);setTimeout(function(){sw.remove()},800);
+var colors=['#ffd700','#ffec8b','#ffa500','#fff4b0','#ff8c00','#ffe46a'];
+var count=Math.round(16*intense);
+for(var i=0;i<count;i++){
+var p=document.createElement('div');p.className='particle';p.style.left=cx+'px';p.style.top=cy+'px';p.style.background=colors[i%colors.length];p.style.boxShadow='0 0 10px '+colors[i%colors.length]+',0 0 20px rgba(255,170,0,.5)';stage.appendChild(p);
+var angle=(Math.PI*2*i)/count+Math.random()*0.4;var dist=(70+Math.random()*100)*intense;var dx=Math.cos(angle)*dist;var dy=Math.sin(angle)*dist;
+p.animate([{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale(0)',opacity:0}],{duration:650+Math.random()*350,easing:'cubic-bezier(.1,.8,.3,1)'});
+(function(el){setTimeout(function(){el.remove()},1000)})(p);
+}
+}
+function getStageXY(cx,cy){
+var stage=document.getElementById('stage');
+var rect=stage.getBoundingClientRect();
+var sx=2340/rect.width,sy=1080/rect.height;
+return {x:(cx-rect.left)*sx,y:(cy-rect.top)*sy};
+}
+document.querySelectorAll('.hotspot').forEach(function(btn){
+btn.addEventListener('click',function(e){
+e.stopPropagation();
+var p=getStageXY(e.clientX,e.clientY);
+spawnEffect(p.x,p.y,1);
+});
+});
+document.getElementById('stage').addEventListener('click',function(e){
+if(e.target.closest('.hotspot'))return;
+var p=getStageXY(e.clientX,e.clientY);
+spawnEffect(p.x,p.y,0.8);
+});
+
+// ===== BGM背景音乐系统 =====
+var bgmAudio = null;
+var bgmReady = false;
+var bgmStarted = false;
+var userHasInteracted = false;
+
+function initBGM(){
+  bgmAudio = new Audio();
+  bgmAudio.src = 'audio/bgm/bgm.m4a';
+  bgmAudio.loop = true;
+  bgmAudio.preload = 'auto';
+  bgmAudio.volume = 0.6;
+
+  bgmAudio.addEventListener('canplaythrough', function(){
+    bgmReady = true;
+    if(userHasInteracted && !bgmStarted){
+      playBGM();
+    }
+  });
+
+  bgmAudio.addEventListener('error', function(e){
+    console.log('BGM加载失败:', e);
+  });
+
+  // 尝试自动播放（被浏览器阻止是正常的）
+  bgmAudio.play().then(function(){
+    bgmStarted = true;
+    removeBGMListeners();
+  }).catch(function(){
+    // 被浏览器阻止，等用户交互
+  });
+}
+
+function playBGM(){
+  if(bgmStarted) return;
+  if(!bgmReady){
+    bgmAudio.load();
+    var onceHandler = function(){
+      bgmAudio.removeEventListener('canplaythrough', onceHandler);
+      bgmAudio.play().then(function(){
+        bgmStarted = true;
+        removeBGMListeners();
+      }).catch(function(){});
+    };
+    bgmAudio.addEventListener('canplaythrough', onceHandler);
+    return;
+  }
+  bgmAudio.play().then(function(){
+    bgmStarted = true;
+    removeBGMListeners();
+  }).catch(function(){});
+}
+
+function onUserInteractionForBGM(){
+  if(bgmStarted) return;
+  userHasInteracted = true;
+  playBGM();
+}
+
+function removeBGMListeners(){
+  document.removeEventListener('click', onUserInteractionForBGM, true);
+  document.removeEventListener('touchstart', onUserInteractionForBGM, true);
+  document.removeEventListener('keydown', onUserInteractionForBGM, true);
+}
+
+// 5秒兜底重试
+setTimeout(function(){
+  if(!bgmStarted && userHasInteracted){
+    playBGM();
+  }
+}, 5000);
+
+// 音量控制
+function initBGMVolume(){
+  var volumeSlider = document.getElementById('bgmVolume');
+  var volumeValue = document.getElementById('bgmVolumeValue');
+  if(volumeSlider){
+    volumeSlider.addEventListener('input', function(){
+      var vol = parseInt(this.value);
+      if(bgmAudio){
+        bgmAudio.volume = vol / 100;
+      }
+      if(volumeValue){
+        volumeValue.textContent = vol;
+      }
+    });
+  }
+}
+
+// 初始化BGM
+initBGM();
+initBGMVolume();
+document.addEventListener('click', onUserInteractionForBGM, true);
+document.addEventListener('touchstart', onUserInteractionForBGM, true);
+document.addEventListener('keydown', onUserInteractionForBGM, true);
+</script>
+</body>
+</html>
