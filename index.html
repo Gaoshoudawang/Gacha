@@ -70,7 +70,9 @@ body.page-0 .nav-arrow-right{display:flex!important;}
 body.page-1 .nav-arrow-left{display:flex!important;}
 body.page-1 .nav-arrow-right{display:flex!important;}
 body.page-2 .nav-arrow-left{display:flex!important;}
-body.page-2 .nav-arrow-right{display:none!important;}
+body.page-2 .nav-arrow-right{display:flex!important;}
+body.page-3 .nav-arrow-left{display:flex!important;}
+body.page-3 .nav-arrow-right{display:none!important;}
 
 /* 圆点 */
 #pageDots{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:16px;z-index:20;}
@@ -486,6 +488,21 @@ body.is-fullscreen .disclaimer-box{display:none!important}
         <div class="hotspot" data-name="敬请期待" style="left:1649px;top:630px;width:398px;height:260px"></div>
       </div>
     </div>
+    <!-- 第4页 -->
+    <div class="page">
+      <div class="activity-card"><img src="images/pages/float/page4_card1.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page4_card2.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page4_card3.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page4_card4.png"></div>
+      <div class="activity-card"><img src="images/pages/float/page4_card5.png"></div>
+      <div class="btn-layer">
+        <div class="hotspot" data-name="敬请期待" style="left:293px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:293px;top:630px;width:398px;height:260px"></div>
+        <div class="hotspot pulse" data-name="敬请期待" style="left:760px;top:190px;width:820px;height:680px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:1649px;top:173px;width:398px;height:420px"></div>
+        <div class="hotspot" data-name="敬请期待" style="left:1649px;top:630px;width:398px;height:260px"></div>
+      </div>
+    </div>
   </div>
 
   <!-- 箭头 -->
@@ -497,6 +514,7 @@ body.is-fullscreen .disclaimer-box{display:none!important}
     <div class="page-dot active" onclick="goPage(0)"></div>
     <div class="page-dot" onclick="goPage(1)"></div>
     <div class="page-dot" onclick="goPage(2)"></div>
+    <div class="page-dot" onclick="goPage(3)"></div>
   </div>
 
 </div>
@@ -528,7 +546,7 @@ body.is-fullscreen .disclaimer-box{display:none!important}
 </div>
 
 <script>
-var totalPages = 3;
+var totalPages = 4;
 
 function layoutStage(){
   var scale = Math.min(window.innerWidth / 2340, window.innerHeight / 1080);
